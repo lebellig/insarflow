@@ -204,3 +204,73 @@ For `val` and `test`, `__getitem__` also returns the SAR images and the temporal
 Flow matching utilities under `insarflow/flow_matching/` are derived from work
 Copyright (c) Meta Platforms, Inc. and affiliates, licensed under CC-BY-NC.
 The InSAR-specific code is provided under **CC-BY-NC-4.0**.
+
+---
+
+## Project structure
+
+```
+insarflow/
+├── pyproject.toml                          # Package metadata and dependencies (UV/Hatchling)
+├── .python-version                         # Python version pin (3.11)
+├── README.md                               # This file
+├── demo.ipynb                              # Denoising demo on both datasets + cross-domain
+│
+├── configs/                                # Hydra configuration files
+│   ├── train.yaml                          # Training config (defaults to Mexico dataset)
+│   ├── inference.yaml                      # Inference config (defaults to Simulation dataset)
+│   └── dataset/                            # Dataset config group
+│       ├── mexico.yaml                     # Mexico dataset (real InSAR, 256×256, batch 4)
+│       └── simulation.yaml                 # Simulation dataset (synthetic InSAR, 256×256, batch 4)
+│
+└── insarflow/                              # Main Python package
+    ├── __init__.py                         # Public API: InSARFlow, EMAModel
+    ├── model.py                            # Core model: InSARFlow + EMAModel + registries
+    ├── train.py                            # Training entry point (Hydra + Lightning Fabric)
+    ├── inference.py                        # Inference entry point (Hydra)
+    ├── metrics.py                          # Circular MSE/MAE/RMSE, phase coherence, PSNR
+    │
+    ├── models/                             # Neural network backbones
+    │   ├── __init__.py                     # Exports: FCDMSmall / Base / Large / XLarge
+    │   └── fcdm.py                         # FCDM variants (Small / Base / Large / XLarge)
+    │
+    ├── flow_matching/                      # Riemannian flow matching framework
+    │   ├── __init__.py
+    │   │
+    │   ├── path/                           # Probability paths
+    │   │   ├── __init__.py                 # Exports: ProbPath, GeodesicProbPath, PathSample
+    │   │   ├── path.py                     # Abstract ProbPath base class
+    │   │   ├── path_sample.py              # PathSample dataclass
+    │   │   ├── geodesic.py                 # GeodesicProbPath (Riemannian geodesic interpolation)
+    │   │   └── scheduler/
+    │   │       ├── __init__.py             # Exports: Scheduler, ConvexScheduler, CondOTScheduler, SchedulerOutput
+    │   │       └── scheduler.py            # Scheduler, ConvexScheduler, CondOTScheduler
+    │   │
+    │   ├── solver/                         # ODE solvers
+    │   │   ├── __init__.py                 # Exports: Solver, RiemannianODESolver
+    │   │   ├── solver.py                   # Abstract Solver base class
+    │   │   └── riemannian_ode_solver.py    # RiemannianODESolver (Euler / midpoint / RK4 on manifold)
+    │   │
+    │   └── utils/                          # Utility functions and manifolds
+    │       ├── __init__.py                 # Exports: expand_tensor_like, ModelWrapper
+    │       ├── utils.py                    # expand_tensor_like
+    │       ├── model_wrapper.py            # ModelWrapper abstract class
+    │       └── manifolds/
+    │           ├── __init__.py             # Exports: Manifold, Euclidean, FlatTorus, geodesic
+    │           ├── manifold.py             # Abstract Manifold + Euclidean
+    │           ├── torus.py                # FlatTorus: [0, 2π]^D (main manifold for InSAR)
+    │           └── utils.py                # geodesic() path generator
+    │
+    ├── data/                               # Dataset classes
+    │   ├── __init__.py                     # Exports: SimulationInSARDataset, MexicoDataset
+    │   ├── simulation.py                   # SimulationInSARDataset (synthetic InSAR)
+    │   ├── mexico.py                       # MexicoDataset (real InSAR, TIFF format)
+    │   └── build.py                        # Standalone script: slices full-image .npy into patches
+    │
+    ├── evaluation/                         # Baseline comparisons
+    │   └── baselines/phinet/               # PhiNet baseline: test_demo.py, visualize_results.py
+    │
+    └── utils/                              # Project utilities
+        ├── __init__.py                     # Exports: setup_logging, fabric_print
+        └── logger.py                       # setup_logging(), fabric_print(), show()
+```
