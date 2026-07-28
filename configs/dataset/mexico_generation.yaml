@@ -1,0 +1,22 @@
+# @package _global_.dataset
+
+img_size: 256
+batch_size: 4
+
+train:
+  _target_: insarflow.data.mexico_generation.MexicoGenerationDataset
+  split: train
+  root_dir: "/users/l/lebellig/insar_dataset/extended_insar_256_ov0.0_dwn4"
+  img_size: ${dataset.img_size}
+
+val:
+  _target_: insarflow.data.mexico_generation.MexicoGenerationDataset
+  split: val
+  root_dir: "/users/l/lebellig/insar_dataset/extended_insar_256_ov0.0_dwn4"
+  img_size: ${dataset.img_size}
+
+test:
+  _target_: insarflow.data.mexico_generation.MexicoGenerationDataset
+  split: test
+  root_dir: "/users/l/lebellig/insar_dataset/extended_insar_256_ov0.0_dwn4"
+  img_size: ${dataset.img_size}

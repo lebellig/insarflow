@@ -1,0 +1,10 @@
+defaults:
+  - dataset: simulation   # override with `dataset=simulation` on the CLI
+  - _self_
+
+name: ???
+checkpoint: ???
+output_dir: "."
+num_samples: null
+device: "cuda"
+n_sampling_steps: 50

@@ -1,0 +1,36 @@
+defaults:
+  - dataset: simulation   # override with `dataset=simulation` on the CLI
+  - _self_
+
+# EXPERIMENT
+experiment_name: "unet_baseline"
+seed: 42
+n_training_samples: null  # null = use all samples; set to e.g. 100 to cap the training budget
+
+# TRAINING
+lr: 1e-4
+ema_decay: 0.999
+grad_clip: 0.5
+warmup_steps: 500
+max_training_steps: 100000
+n_samples: 8
+
+# LOG AND SAVE
+save_dir: "/share/DEEPLEARNING/lebellig/outputs/insarflow"
+print_n_steps: 10
+save_n_steps: 5000
+sample_every_n_steps: 20
+val_every_n_steps: 500    # full pass over the 100-sample val set
+
+fabric:
+  _target_: lightning.fabric.Fabric
+  accelerator: gpu
+  strategy: auto
+  devices: 1
+  precision: bf16-mixed
+
+# UNET BASELINE (supervised, time-independent)
+unet:
+  _target_: insarflow.train_unet.UNetBaseline
+  img_size: ${dataset.img_size}
+  backbone_name: FCDMBase  # FCDMSmall | FCDMBase | FCDMLarge | FCDMXLarge
