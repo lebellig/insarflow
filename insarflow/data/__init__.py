@@ -1,4 +1,4 @@
 from insarflow.data.simulation import SimulationInSARDataset
 from insarflow.data.mexico import MexicoDataset
 
-__all__ = ["SimulationInSARDataset", "MexicoDataset", "MixDataset"]
+__all__ = ["SimulationInSARDataset", "MexicoDataset"]

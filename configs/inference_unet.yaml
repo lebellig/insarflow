@@ -1,8 +1,0 @@
-defaults:
-  - dataset: simulation   # override with `dataset=mexico` on the CLI
-  - _self_
-
-name: ???
-checkpoint: ???
-output_dir: "."
-device: "cuda"

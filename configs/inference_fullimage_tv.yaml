@@ -1,7 +1,0 @@
-# @package _global_
-
-name: ???
-output_dir: "."
-device: "cuda"
-tv_iters: 300
-alpha: 0.6
