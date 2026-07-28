@@ -11,10 +11,7 @@ uv.lock
 *.yml
 *.so
 *.hdf5
-*.ckpt
 *.wandb
 /wandb/
-/ckpt/
-/data/
 .DS_Store
 __pycache__
