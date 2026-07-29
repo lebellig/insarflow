@@ -1,11 +1,6 @@
-# InSARFlow
-
-**Riemannian Flow Matching for InSAR Denoising and Generation**
+# InSARFlow: Riemannian Flow Matching for Interferometric SAR
 
 ![Noisy interferogram, denoised output and ground truth for a real and a synthetic InSAR sample](assets/denoising.png)
-
-*Noisy interferogram → denoised output → ground truth, on a real Mexico patch (top) and a
-synthetic sample (bottom). Both produced with the checkpoints below, 5 midpoint ODE steps.*
 
 `InSARFlow` implements generative models for Interferometric Synthetic Aperture Radar (InSAR)
 phase data. It runs **flow matching on the flat torus**, which handles the
@@ -234,14 +229,6 @@ root_dir/
 ```
 
 For `val` and `test`, `__getitem__` also returns the SAR images and the temporal baseline.
-
----
-
-## License
-
-Flow matching utilities under `insarflow/flow_matching/` are derived from work
-Copyright (c) Meta Platforms, Inc. and affiliates, licensed under CC-BY-NC.
-The InSAR-specific code is provided under **CC-BY-NC-4.0**.
 
 ---
 
