@@ -43,7 +43,11 @@ and the datasets are not distributed with the repository.
 
 ## Installation
 
-Requires Python ≥ 3.11 and [uv](https://docs.astral.sh/uv/).
+Requires Python ≥ 3.11.
+
+### With uv (recommended)
+
+Needs [uv](https://docs.astral.sh/uv/).
 
 ```bash
 git clone git@github.com:lebellig/insarflow.git
@@ -56,6 +60,30 @@ uv sync --extra dev     # with development extras
 on Linux/Windows, PyPI (CPU + MPS) on macOS. This is driven by the `sys_platform` markers on
 `torch` / `torchvision` in `[tool.uv.sources]`; to force CPU-only on Linux or Windows, point
 them at `https://download.pytorch.org/whl/cpu`.
+
+### With conda
+
+```bash
+conda create -n insarflow python=3.11
+conda activate insarflow
+
+git clone git@github.com:lebellig/insarflow.git
+cd insarflow
+
+# On Linux/Windows with a GPU, install the matching PyTorch build first
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+
+pip install -e .            # editable install
+pip install -e ".[dev]"     # with development extras
+```
+
+The `[tool.uv.sources]` pins are uv-only, so `pip` resolves `torch` / `torchvision` from PyPI —
+hence the explicit `--index-url` line above when you need a specific CUDA build. On macOS, or
+for CPU-only, drop that line (or point it at `https://download.pytorch.org/whl/cpu`) and let
+`pip install -e .` pull the default wheels.
+
+Both entry points then run without the `uv run` prefix: `python -m insarflow.train`,
+`insarflow-train`, and so on.
 
 ---
 
