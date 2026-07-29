@@ -78,17 +78,8 @@ denoised = model.denoise(raw.to(DEVICE), steps=N_STEPS, method="midpoint", use_e
 show(raw, denoised, clean, "Mexico", img_size=IMG_SIZE)
 ```
 
-Because the architecture comes from the checkpoint, a model trained on one domain can be
-applied to another without any reconfiguration — e.g. denoising real Mexico interferograms
-with a model trained only on synthetic data:
-
-```python
-simulation_model, _ = InSARFlow.from_checkpoint("ckpt/simulation.ckpt", device=DEVICE)
-simulation_model.eval()
-
-crossdomain = simulation_model.denoise(raw.to(DEVICE), steps=N_STEPS, method="midpoint", use_ema=True)
-show(raw, crossdomain, clean, "Cross-Domain", img_size=IMG_SIZE)
-```
+Swapping to `ckpt/simulation.ckpt` and `SimulationInSARDataset` runs the same code on the
+synthetic domain — because the architecture comes from the checkpoint, nothing else changes.
 
 See [`demo.ipynb`](demo.ipynb) for the full runnable version covering both datasets.
 Note that `ckpt/` and `data/` are git-ignored: the checkpoints come from the Drive folder above,
@@ -234,7 +225,7 @@ insarflow/
 ├── pyproject.toml                          # Package metadata and dependencies (UV/Hatchling)
 ├── .python-version                         # Python version pin (3.11)
 ├── README.md                               # This file
-├── demo.ipynb                              # Denoising demo on both datasets + cross-domain
+├── demo.ipynb                              # Denoising demo on both datasets
 │
 ├── configs/                                # Hydra configuration files
 │   ├── train.yaml                          # Training config (defaults to Mexico dataset)

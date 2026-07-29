@@ -88,13 +88,15 @@ def show(
                 ax.set_title(label, fontsize=12, pad=4)
 
     fig.suptitle(title, fontsize=13, y=1 - 0.12 / fig_h)
-    # Its own axes, so the colorbar cannot steal width from the image grid.
+    # Its own axes, so the colorbar cannot steal width from the image grid. It
+    # spans a third of the mosaic height, vertically centred on it.
+    cbar_h = grid_h / 2
     cax = fig.add_axes(
         [
             (left_in + grid_w + 0.12) / fig_w,
-            bottom_in / fig_h,
+            (bottom_in + (grid_h - cbar_h) / 2) / fig_h,
             0.13 / fig_w,
-            grid_h / fig_h,
+            cbar_h / fig_h,
         ]
     )
     fig.colorbar(
