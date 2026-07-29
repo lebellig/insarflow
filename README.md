@@ -27,6 +27,26 @@ them at `https://download.pytorch.org/whl/cpu`.
 
 ---
 
+## Downloading the checkpoints
+
+`ckpt/` is git-ignored, so the pretrained weights are not distributed with the repository. They
+live in a [shared Google Drive folder](https://drive.google.com/drive/folders/14O9JmA2hXnp62npSp_I89TL9bHc3eNfS?usp=sharing)
+instead. Both files are ~2 GB (~4 GB total).
+
+Download `mexico.ckpt` and `simulation.ckpt` and place them in a `ckpt/` directory at the
+repository root:
+
+```
+insarflow/
+└── ckpt/
+    ├── mexico.ckpt        # trained on real Mexico interferograms
+    └── simulation.ckpt    # trained on synthetic data
+```
+
+These are the paths the code and the demo notebook expect.
+
+---
+
 ## Loading a checkpoint
 
 `InSARFlow.from_checkpoint` rebuilds the model from the config stored inside the `.ckpt`
@@ -71,8 +91,8 @@ show(raw, crossdomain, clean, "Cross-Domain", img_size=IMG_SIZE)
 ```
 
 See [`demo.ipynb`](demo.ipynb) for the full runnable version covering both datasets.
-Note that `ckpt/` and `data/` are git-ignored, so checkpoints and data are not distributed
-with the repository.
+Note that `ckpt/` and `data/` are git-ignored: the checkpoints come from the Drive folder above,
+and the datasets are not distributed with the repository.
 
 ### Saving and resuming
 
