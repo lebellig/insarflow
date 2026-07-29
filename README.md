@@ -37,13 +37,10 @@ Swapping to `ckpt/simulation.ckpt` and `SimulationInSARDataset` runs the same co
 synthetic domain — because the architecture comes from the checkpoint, nothing else changes.
 
 See [`demo.ipynb`](demo.ipynb) for the full runnable version covering both datasets.
-Note that `ckpt/` and `data/` are git-ignored: the checkpoints come from the Drive folder above,
-and the datasets are not distributed with the repository.
+Note that `ckpt/` is git-ignored: the checkpoints come from the Drive folder above.
 
 
 ## Installation
-
-Requires Python ≥ 3.11.
 
 ### With uv (recommended)
 
