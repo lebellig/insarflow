@@ -160,27 +160,6 @@ dataset class they instantiate (`MexicoDataset` vs. `SimulationInSARDataset`) an
 
 ---
 
-## How it works
-
-Noisy phase, shaped `[batch, H×W]` and valued in `[0, 2π)`, is projected onto the torus with
-`expmap`, reshaped to `[batch, 1, H, W]`, passed through the backbone to predict the velocity
-field v_θ(x_t, t), projected back onto the tangent space with `proju`, and flattened again.
-
-- **Training:** `L = E‖ v_θ(x_t, t) − ẋ_t ‖²` (flow-matching L2 loss).
-- **Inference:** a Riemannian ODE solve x₀ → x₁, with `euler`, `midpoint`, or `rk4` steps.
-
-The flat torus makes the manifold operations trivial to compute:
-
-| Operation | Formula |
-|-----------|---------|
-| `expmap(x, u)` | `(x + u) mod 2π` |
-| `logmap(x, y)` | `atan2(sin(y−x), cos(y−x))` |
-| `projx(x)` | `x mod 2π` |
-| `proju(x, u)` | `u` |
-
-`GeodesicProbPath` interpolates between source x₀ and target x₁ along torus geodesics,
-parameterized by `CondOTScheduler` (α_t = t, σ_t = 1−t).
-
 ### Backbones
 
 Selected via the `backbone_name` config key. The FCDM family (`insarflow/models/fcdm.py`) is a
