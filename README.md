@@ -3,11 +3,43 @@
 **Riemannian Flow Matching for InSAR Denoising and Generation**
 
 `InSARFlow` implements generative models for Interferometric Synthetic Aperture Radar (InSAR)
-phase data. It runs **flow matching on the flat torus** T^D = [0, 2π)^D, which handles the
+phase data. It runs **flow matching on the flat torus**, which handles the
 inherent 2π-periodicity of SAR phase natively instead of treating it as an unconstrained
-real-valued signal.
+real-valued signal. 
+
+*Quickstart: → [`demo.ipynb`](demo.ipynb)*
 
 ---
+
+
+## Loading a checkpoint
+
+`InSARFlow.from_checkpoint` rebuilds the model from the config stored inside the `.ckpt`
+(backbone, manifold, image size) and loads the weights — you don't need to know the
+architecture up front. `denoise` then solves the flow-matching ODE on the flat torus,
+starting from the noisy phase.
+
+```python
+
+from insarflow.data import MexicoDataset
+from insarflow.model import InSARFlow
+from insarflow.utils.logger import show
+
+model, _ = InSARFlow.from_checkpoint("ckpt/mexico.ckpt", device=DEVICE)
+model.eval()
+denoised = model.denoise(noisy_interferogram, steps=N_STEPS, method="midpoint", use_ema=True)
+
+# One row per sample: noisy interferogram | model output | ground truth
+show(noisy_interferogram, denoised, clean, "Mexico", img_size=IMG_SIZE)
+```
+
+Swapping to `ckpt/simulation.ckpt` and `SimulationInSARDataset` runs the same code on the
+synthetic domain — because the architecture comes from the checkpoint, nothing else changes.
+
+See [`demo.ipynb`](demo.ipynb) for the full runnable version covering both datasets.
+Note that `ckpt/` and `data/` are git-ignored: the checkpoints come from the Drive folder above,
+and the datasets are not distributed with the repository.
+
 
 ## Installation
 
@@ -46,44 +78,6 @@ insarflow/
 These are the paths the code and the demo notebook expect.
 
 ---
-
-## Loading a checkpoint
-
-`InSARFlow.from_checkpoint` rebuilds the model from the config stored inside the `.ckpt`
-(backbone, manifold, image size) and loads the weights — you don't need to know the
-architecture up front. `denoise` then solves the flow-matching ODE on the flat torus,
-starting from the noisy phase.
-
-```python
-import numpy as np
-import torch
-
-from insarflow.data import MexicoDataset
-from insarflow.model import InSARFlow
-from insarflow.utils.logger import show
-
-DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
-IMG_SIZE, N_SAMPLES, N_STEPS = 256, 3, 5
-
-model, _ = InSARFlow.from_checkpoint("ckpt/mexico.ckpt", device=DEVICE)
-model.eval()
-
-dataset = MexicoDataset(split="test", root_dir="data/mexico", img_size=IMG_SIZE)
-raw = torch.stack([torch.as_tensor(np.float32(dataset[i]["x0"])) for i in range(N_SAMPLES)])
-clean = torch.stack([torch.as_tensor(np.float32(dataset[i]["x1"])) for i in range(N_SAMPLES)])
-
-denoised = model.denoise(raw.to(DEVICE), steps=N_STEPS, method="midpoint", use_ema=True)
-
-# One row per sample: noisy input → model output → ground truth
-show(raw, denoised, clean, "Mexico", img_size=IMG_SIZE)
-```
-
-Swapping to `ckpt/simulation.ckpt` and `SimulationInSARDataset` runs the same code on the
-synthetic domain — because the architecture comes from the checkpoint, nothing else changes.
-
-See [`demo.ipynb`](demo.ipynb) for the full runnable version covering both datasets.
-Note that `ckpt/` and `data/` are git-ignored: the checkpoints come from the Drive folder above,
-and the datasets are not distributed with the repository.
 
 ### Saving and resuming
 
