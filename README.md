@@ -2,6 +2,11 @@
 
 **Riemannian Flow Matching for InSAR Denoising and Generation**
 
+![Noisy interferogram, denoised output and ground truth for a real and a synthetic InSAR sample](assets/denoising.png)
+
+*Noisy interferogram → denoised output → ground truth, on a real Mexico patch (top) and a
+synthetic sample (bottom). Both produced with the checkpoints below, 5 midpoint ODE steps.*
+
 `InSARFlow` implements generative models for Interferometric Synthetic Aperture Radar (InSAR)
 phase data. It runs **flow matching on the flat torus**, which handles the
 inherent 2π-periodicity of SAR phase natively instead of treating it as an unconstrained
@@ -248,6 +253,7 @@ insarflow/
 ├── .python-version                         # Python version pin (3.11)
 ├── README.md                               # This file
 ├── demo.ipynb                              # Denoising demo on both datasets
+├── assets/denoising.png                    # README figure
 │
 ├── configs/                                # Hydra configuration files
 │   ├── train.yaml                          # Training config (defaults to Mexico dataset)

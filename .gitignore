@@ -4,6 +4,8 @@ uv.lock
 /outputs
 /scripts
 *.png
+# README figures are tracked
+!assets/*.png
 *.npy
 *.pt
 *.mat
