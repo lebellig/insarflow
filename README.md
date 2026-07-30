@@ -44,11 +44,15 @@ denoised = model.denoise(noisy_interferogram, steps=N_STEPS, method="midpoint", 
 show(noisy_interferogram, denoised, clean, "Mexico", img_size=IMG_SIZE)
 ```
 
+`denoise` accepts the phase as `(H, W)`, `(B, H, W)`, `(B, 1, H, W)`, or flat `(H*W,)` /
+`(B, H*W)` and returns the same shape it was given. `H` and `W` must match the checkpoint's
+`img_size` (256 by default); anything else raises a `ValueError` naming the expected shapes.
+
 Swapping to `ckpt/simulation.ckpt` and `SimulationInSARDataset` runs the same code on the
 synthetic domain — because the architecture comes from the checkpoint, nothing else changes.
 
 See [`demo.ipynb`](demo.ipynb) for the full runnable version covering both datasets.
-Note that `ckpt/` is git-ignored: the checkpoints come from the Drive folder above.
+Note that `ckpt/` is git-ignored — see [Downloading the checkpoints](#downloading-the-checkpoints).
 
 
 ## Installation
@@ -97,12 +101,18 @@ Both entry points then run without the `uv run` prefix: `python -m insarflow.tra
 
 ## Downloading the checkpoints
 
-`ckpt/` is git-ignored, so the pretrained weights are not distributed with the repository. They
-live in a [shared Google Drive folder](https://drive.google.com/drive/folders/14O9JmA2hXnp62npSp_I89TL9bHc3eNfS?usp=sharing)
-instead. Both files are ~2 GB (~4 GB total).
+The pretrained weights are ~960 MiB each, far past GitHub's 100 MiB per-file limit, so `ckpt/`
+is git-ignored and the checkpoints are attached to the
+[latest release](https://github.com/lebellig/insarflow/releases/latest) instead:
 
-Download `mexico.ckpt` and `simulation.ckpt` and place them in a `ckpt/` directory at the
-repository root:
+```bash
+mkdir -p ckpt
+BASE=https://github.com/lebellig/insarflow/releases/download/v1.0.0
+curl -L -o ckpt/mexico.ckpt     $BASE/mexico.ckpt        # real Mexico interferograms
+curl -L -o ckpt/simulation.ckpt $BASE/simulation.ckpt    # synthetic data
+```
+
+That leaves the layout the code and the demo notebook expect:
 
 ```
 insarflow/
@@ -111,7 +121,22 @@ insarflow/
     └── simulation.ckpt    # trained on synthetic data
 ```
 
-These are the paths the code and the demo notebook expect.
+Both are `FCDMBase` at `img_size=256` (~126M parameters), trained with EMA for ~100k steps.
+They carry the current and EMA copies of the velocity field, so `denoise(use_ema=True)` and
+`use_ema=False` both work — but the optimizer and scheduler state has been stripped to halve
+the download, so **training cannot be resumed from them**.
+
+### Preparing a checkpoint for release
+
+`insarflow.export` produces the distributable files from raw training checkpoints, dropping the
+optimizer and scheduler state (~1.9 GiB → ~960 MiB) and leaving the weights untouched:
+
+```bash
+uv run python -m insarflow.export ckpt/mexico.ckpt ckpt/simulation.ckpt --out-dir dist/
+```
+
+Then attach `dist/*.ckpt` to a GitHub release (release assets allow up to 2 GiB per file and
+don't consume Git LFS quota).
 
 ---
 
@@ -247,6 +272,7 @@ insarflow/
     ├── model.py                            # Core model: InSARFlow + EMAModel + registries
     ├── train.py                            # Training entry point (Hydra + Lightning Fabric)
     ├── inference.py                        # Inference entry point (Hydra)
+    ├── export.py                           # Standalone script: strips training state for release
     ├── metrics.py                          # Circular MSE/MAE/RMSE, phase coherence, PSNR
     │
     ├── models/                             # Neural network backbones

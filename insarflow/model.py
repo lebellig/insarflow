@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from einops import rearrange
-from typing import Optional, Dict, Any, Tuple
+from typing import Callable, Optional, Dict, Any, Tuple
 
 from insarflow.flow_matching.utils.manifolds import Euclidean, FlatTorus
 from insarflow.models.fcdm import FCDMSmall, FCDMBase, FCDMLarge, FCDMXLarge
@@ -215,6 +215,44 @@ class InSARFlow(nn.Module):
             self(path_sample.x_t, path_sample.t[:, 0]) - path_sample.dx_t, 2
         ).mean()
 
+    def _to_flat_batch(
+        self, x0: torch.Tensor
+    ) -> Tuple[torch.Tensor, Callable[[torch.Tensor], torch.Tensor]]:
+        """Normalise any accepted input layout to the flat ``(b, c*h*w)`` the model expects.
+
+        Accepts ``(h, w)``, ``(b, h, w)`` / ``(1, h, w)``, ``(b, 1, h, w)`` and the flat
+        ``(d,)`` / ``(b, d)`` forms. Returns the flattened tensor along with a function
+        that maps a solver output back to the caller's layout.
+        """
+        shape = tuple(x0.shape)
+        s = self.img_size
+        d = s * s
+        spatial = shape[-2:] == (s, s)
+
+        if x0.ndim == 1 and shape[0] == d:
+            flat = x0.unsqueeze(0)
+        elif x0.ndim == 2 and shape[-1] == d:
+            flat = x0
+        elif x0.ndim == 2 and spatial:
+            flat = x0.reshape(1, d)
+        elif x0.ndim == 3 and spatial:
+            # Leading axis is a batch; a channel axis of 1 flattens to the same thing.
+            flat = x0.reshape(-1, d)
+        elif x0.ndim == 4 and spatial and shape[1] == 1:
+            flat = x0.reshape(shape[0], d)
+        else:
+            raise ValueError(
+                f"denoise() got input of shape {shape}, which does not match "
+                f"img_size={s}. Expected ({s}, {s}), (b, {s}, {s}), (b, 1, {s}, {s}), "
+                f"({d},) or (b, {d})."
+            )
+
+        def restore(out: torch.Tensor) -> torch.Tensor:
+            # return_intermediates prepends a step axis to the (b, d) solver output.
+            return out.reshape(*out.shape[:-2], *shape)
+
+        return flat, restore
+
     @torch.no_grad()
     def denoise(
         self,
@@ -224,6 +262,8 @@ class InSARFlow(nn.Module):
         use_ema: bool = False,
         return_intermediates: bool = False,
     ) -> torch.Tensor:
+
+        x0, restore = self._to_flat_batch(x0)
 
         center = torch.zeros_like(x0)
         x_init = self.manifold.expmap(center, x0)
@@ -239,10 +279,12 @@ class InSARFlow(nn.Module):
         wrapper = SolverWrapper(self)
         solver = RiemannianODESolver(velocity_model=wrapper, manifold=self.manifold)
 
-        return solver.sample(
+        out = solver.sample(
             x_init=x_init,
             step_size=1.0 / steps,
             method=method,
             return_intermediates=return_intermediates,
             verbose=False,
         )
+
+        return restore(out)
