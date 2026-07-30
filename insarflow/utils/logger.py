@@ -26,6 +26,41 @@ def fabric_print(fabric):
         else None
     )
 
+def _to_image_batch(x: np.ndarray | torch.Tensor, img_size: int, name: str) -> np.ndarray:
+    """Normalise any layout ``denoise`` accepts or returns to ``(b, img_size, img_size)``.
+
+    Handles ``(h, w)``, ``(b, h, w)`` / ``(1, h, w)``, ``(b, 1, h, w)`` and the flat
+    ``(d,)`` / ``(b, d)`` forms, so a single unbatched patch plots as one row rather
+    than being mistaken for a batch of rows.
+    """
+    if isinstance(x, torch.Tensor):
+        # .float() first: numpy has no bfloat16, which inference.py produces.
+        x = x.detach().float().cpu().numpy()
+    x = np.asarray(x)
+
+    s = img_size
+    d = s * s
+    shape = x.shape
+    spatial = shape[-2:] == (s, s)
+
+    if x.ndim == 1 and shape[0] == d:
+        return x.reshape(1, s, s)
+    if x.ndim == 2 and shape[-1] == d:
+        return x.reshape(-1, s, s)
+    if x.ndim == 2 and spatial:
+        return x.reshape(1, s, s)
+    if x.ndim == 3 and spatial:
+        # Leading axis is a batch; a channel axis of 1 reshapes to the same thing.
+        return x.reshape(-1, s, s)
+    if x.ndim == 4 and spatial and shape[1] == 1:
+        return x.reshape(shape[0], s, s)
+
+    raise ValueError(
+        f"show() got {name} of shape {shape}, which does not match img_size={s}. "
+        f"Expected ({s}, {s}), (b, {s}, {s}), (b, 1, {s}, {s}), ({d},) or (b, {d})."
+    )
+
+
 def show(
     raw: np.ndarray | torch.Tensor,
     denoised: np.ndarray | torch.Tensor,
@@ -38,16 +73,23 @@ def show(
 ):
     """One row per sample: noisy input, model output, ground truth.
 
+    Each argument may use any layout ``denoise`` accepts or returns — ``(h, w)``,
+    ``(b, h, w)``, ``(b, 1, h, w)``, ``(d,)`` or ``(b, d)`` — and the three need not
+    agree with each other, only on the number of samples.
+
     The grid is laid out in absolute inches so the panels sit exactly ``gap_px``
     apart. Each cell is square and matches the square image, so ``imshow`` fills
     it edge to edge instead of shrinking and leaving slack inside the axes.
     """
-    if isinstance(raw, torch.Tensor):
-        raw = raw.cpu().numpy()
-    if isinstance(denoised, torch.Tensor):
-        denoised = denoised.cpu().numpy()
-    if isinstance(truth, torch.Tensor):
-        truth = truth.cpu().numpy()
+    raw = _to_image_batch(raw, img_size, "raw")
+    denoised = _to_image_batch(denoised, img_size, "denoised")
+    truth = _to_image_batch(truth, img_size, "truth")
+
+    if not len(raw) == len(denoised) == len(truth):
+        raise ValueError(
+            f"show() got mismatched sample counts: raw={len(raw)}, "
+            f"denoised={len(denoised)}, truth={len(truth)}."
+        )
 
     n_rows, n_cols = len(raw), 3
     gap_in = gap_px / dpi
@@ -81,7 +123,7 @@ def show(
             [(raw[row], "raw"), (denoised[row], "denoised"), (truth[row], "ground truth")]
         ):
             ax = fig.add_subplot(gs[row, col])
-            ax.imshow(img.reshape(img_size, img_size), cmap=CMAP, norm=NORM)
+            ax.imshow(img, cmap=CMAP, norm=NORM)
             ax.set_xticks([])
             ax.set_yticks([])
             if row == 0:

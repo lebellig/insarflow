@@ -25,7 +25,6 @@ from insarflow.data import MexicoDataset
 from insarflow.model import InSARFlow
 from insarflow.utils.logger import show
 
-# Get the checkpoint from https://drive.google.com/drive/folders/14O9JmA2hXnp62npSp_I89TL9bHc3eNfS?usp=sharing
 model, _ = InSARFlow.from_checkpoint("ckpt/mexico.ckpt", device=DEVICE)
 model.eval()
 
@@ -34,8 +33,8 @@ noisy_interferogram = tifffile.imread(ROOT/"data"/"mexico"/"raw"/"test"/"512_153
 clean = tifffile.imread(ROOT/"data"/"mexico"/"clean"/"test"/"512_1536_1_15.tif").astype(np.float32)
 
 # Convert and reshape
-noisy_interferogram = torch.from_numpy(noisy_interferogram).float().reshape(1, -1).to(DEVICE)
-clean = torch.from_numpy(clean).float().reshape(1, -1)
+noisy_interferogram = torch.from_numpy(noisy_interferogram).float().to(DEVICE)
+clean = torch.from_numpy(clean).float()
 
 # Run the denoising model on the noisy interferogram
 denoised = model.denoise(noisy_interferogram, steps=N_STEPS, method="midpoint", use_ema=True)
@@ -45,8 +44,9 @@ show(noisy_interferogram, denoised, clean, "Mexico", img_size=IMG_SIZE)
 ```
 
 `denoise` accepts the phase as `(H, W)`, `(B, H, W)`, `(B, 1, H, W)`, or flat `(H*W,)` /
-`(B, H*W)` and returns the same shape it was given. `H` and `W` must match the checkpoint's
-`img_size` (256 by default); anything else raises a `ValueError` naming the expected shapes.
+`(B, H*W)` and returns the same shape it was given. `H` and
+`W` must match the checkpoint's `img_size` (256 by default); anything else raises a `ValueError`
+naming the expected shapes.
 
 Swapping to `ckpt/simulation.ckpt` and `SimulationInSARDataset` runs the same code on the
 synthetic domain — because the architecture comes from the checkpoint, nothing else changes.
