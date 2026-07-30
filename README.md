@@ -25,8 +25,19 @@ from insarflow.data import MexicoDataset
 from insarflow.model import InSARFlow
 from insarflow.utils.logger import show
 
+# Get the checkpoint from https://drive.google.com/drive/folders/14O9JmA2hXnp62npSp_I89TL9bHc3eNfS?usp=sharing
 model, _ = InSARFlow.from_checkpoint("ckpt/mexico.ckpt", device=DEVICE)
 model.eval()
+
+# Read one of the examples interferograms and its corresponding clean image
+noisy_interferogram = tifffile.imread(ROOT/"data"/"mexico"/"raw"/"test"/"512_1536_1_15.tif").astype(np.float32)
+clean = tifffile.imread(ROOT/"data"/"mexico"/"clean"/"test"/"512_1536_1_15.tif").astype(np.float32)
+
+# Convert and reshape
+noisy_interferogram = torch.from_numpy(noisy_interferogram).float().reshape(1, -1).to(DEVICE)
+clean = torch.from_numpy(clean).float().reshape(1, -1)
+
+# Run the denoising model on the noisy interferogram
 denoised = model.denoise(noisy_interferogram, steps=N_STEPS, method="midpoint", use_ema=True)
 
 # One row per sample: noisy interferogram | model output | ground truth
