@@ -162,7 +162,8 @@ dataset class they instantiate (`MexicoDataset` vs. `SimulationInSARDataset`) an
 
 ### Backbones
 
-Selected via the `backbone_name` config key. The FCDM family (`insarflow/models/fcdm.py`) is a
+Selected via the `backbone_name` config key. The [FCDM family](https://github.com/star-kwon/FCDM)
+(`insarflow/models/fcdm.py`) is a
 fully convolutional U-Net with ConvNeXt blocks and adaLN-Zero timestep conditioning — being
 fully convolutional, it has no `img_size` dependency.
 
@@ -179,11 +180,14 @@ fully convolutional, it has no `img_size` dependency.
 
 ## Datasets
 
+*Links to the datasets are coming soon*.
+
 Both datasets take `split="train" | "val" | "test"` and carve out a fixed 100-sample validation
 set so the split is identical across runs.
 
 **`SimulationInSARDataset`** — synthetic InSAR. The last 10,000 files of the sorted list are the
-test split; `val` is the first 100 of what remains, `train` the rest.
+test split; `val` is the first 100 of what remains, `train` the rest. These have been generated
+using [Wu et al.'s interferogram simulator](https://github.com/Wu-Patrick/InterferogramSimulator).
 
 ```
 root_dir/
@@ -191,7 +195,8 @@ root_dir/
 └── originWrapped/   # Clean wrapped phase (*.tif)
 ```
 
-**`MexicoDataset`** — real InSAR from Mexico. Here the test split is a separate directory rather
+**`MexicoDataset`** — real InSAR from Mexico using Sentinel-1 SLC at 10m GSD, acquired every 12 days
+between August 14, 2019 and December 6, 2020. Here the test split is a separate directory rather
 than a slice: `train` and `val` both read the `train/` subdirectories (`val` taking the first 100
 files), while `test` reads the `test/` subdirectories. Files are shuffled with a fixed seed of 42.
 
@@ -204,7 +209,8 @@ root_dir/
 └── metadata/{train,test}/      # Per-patch metadata (*.txt), contains time_diff
 ```
 
-For `val` and `test`, `__getitem__` also returns the SAR images and the temporal baseline.
+For `val` and `test`, `__getitem__` also returns the SAR images and the pseudo-clean ground truth
+obtained with the temporal baseline from [COFI-PL](https://ieeexplore.ieee.org/document/10938382).
 
 ---
 
