@@ -7,8 +7,8 @@ phase data. It runs **flow matching on the flat torus**, which handles the
 inherent 2π-periodicity of SAR phase natively instead of treating it as an unconstrained
 real-valued signal. 
 
-*Quickstart: → [`demo.ipynb`](demo.ipynb)*
-
+Quickstart: → [`demo.ipynb`](demo.ipynb),
+article: → [pdf](https://hal.science/hal-05710871/document)
 ---
 
 
@@ -318,4 +318,21 @@ insarflow/
     └── utils/                              # Project utilities
         ├── __init__.py                     # Exports: setup_logging, fabric_print
         └── logger.py                       # setup_logging(), fabric_print(), show()
+```
+
+## Cite
+
+```
+@unpublished{lebellier:hal-05710871,
+  TITLE = {{InSARFlow: Riemannian Flow Matching for Interferometric SAR}},
+  AUTHOR = {Le Bellier, Georges and Breloy, Arnaud and Audebert, Nicolas},
+  URL = {https://hal.science/hal-05710871},
+  NOTE = {working paper or preprint},
+  YEAR = {2026},
+  MONTH = Aug,
+  KEYWORDS = {Generative models ; Interferometric SAR ; Denoising ; Flow Matching},
+  PDF = {https://hal.science/hal-05710871v1/file/iclr2026_conference.pdf},
+  HAL_ID = {hal-05710871},
+  HAL_VERSION = {v1},
+}
 ```
