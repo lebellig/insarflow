@@ -323,16 +323,17 @@ insarflow/
 ## Cite
 
 ```
-@unpublished{lebellier:hal-05710871,
-  TITLE = {{InSARFlow: Riemannian Flow Matching for Interferometric SAR}},
-  AUTHOR = {Le Bellier, Georges and Breloy, Arnaud and Audebert, Nicolas},
-  URL = {https://hal.science/hal-05710871},
-  NOTE = {working paper or preprint},
-  YEAR = {2026},
-  MONTH = Aug,
-  KEYWORDS = {Generative models ; Interferometric SAR ; Denoising ; Flow Matching},
-  PDF = {https://hal.science/hal-05710871v1/file/iclr2026_conference.pdf},
-  HAL_ID = {hal-05710871},
-  HAL_VERSION = {v1},
+@article{LEBELLIER2027110963,
+title = {InSARFlow: Riemannian flow matching for interferometric SAR},
+journal = {Signal Processing},
+volume = {252},
+pages = {110963},
+year = {2027},
+issn = {0165-1684},
+doi = {https://doi.org/10.1016/j.sigpro.2026.110963},
+url = {https://www.sciencedirect.com/science/article/pii/S0165168426004767},
+author = {Georges {Le Bellier} and Arnaud Breloy and Nicolas Audebert},
+keywords = {Interferometric SAR, Flow matching, Riemannian geometry},
+abstract = {Interferometric synthetic aperture radar (InSAR) enables the analysis of topological changes in natural sites or urban areas. This technique operates by recovering the surface displacement from the study of the phase difference (interferogram) between two or multiple SAR images of the same scene at different times. In practice, the use of phase denoising algorithms is necessary to extract relevant information from the interferograms, which motivated numerous developments in the past decade. Due to the inherent periodicity of phases, interferograms can naturally be represented as points on a Riemannian manifold (specifically, the flat torus). This strong prior knowledge motivates the design of learning-based methods that respect the interferogram’s intrinsic geometric constraints. Building on this observation, this paper introduces InSARFlow: a generative modeling framework for the denoising and generation of interferograms. Unlike conventional deep learning approaches formulated in Euclidean spaces, which may violate phase periodicity and produce invalid estimates, this method leverages Riemannian flow matching to learn distributional transports directly on the torus. The interest of this approach is demonstrated on two use cases: (1) realistic interferogram generation, in which we model the transport between uniform noise on the torus to real-world interferograms; (2) interferogram denoising, where InSARFlow transports noisy interferograms to their denoised counterparts. Extensive experiments on a controlled synthetic dataset validate the effectiveness of InSARFlow for interferogram denoising. The proposed approach consistently outperforms studied baselines, highlighting the benefits of geometry-aware learning on the torus. Code and weights available at https://github.com/lebellig/insarflow.}
 }
 ```
